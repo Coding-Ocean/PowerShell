@@ -7,9 +7,9 @@ function run($file) {
     # 拡張子に応じて処理を分岐
     if ($ext -eq ".cpp") {
         # 引数を分けて渡す
-        g++ -std=c++2b $file -o a.exe
+        g++ -std=c++20 $file
     } else {
-        gcc $file -o a.exe
+        gcc $file
     }
 
     # コンパイルが成功した場合のみ実行
@@ -44,22 +44,14 @@ function c {
 #include <stdio.h>
 #include <stdlib.h>
 int main(void)
-{
 
-"@
-
-        # 後半（固定）
-        $after = @"
-
-    return 0;
-}
 "@
 
         # 本文読み込み
         $body = Get-Content $InputFile -Raw
 
         # 結合して .c を生成
-        $before + $body + "`n" + $after | Set-Content $OutputFile -Encoding UTF8
+        $before + $body | Set-Content $OutputFile -Encoding UTF8
 
         # run を呼び出す
         run $OutputFile
