@@ -18,44 +18,56 @@ function run($file) {
     }
 }
 
-function beginer {
+function c {
     param(
-        [string]$InputFile = "beginer",
-        [string]$OutputFile = "beginer.c"
+        [Parameter(Mandatory=$true)]
+        [string]$InputFile
     )
 
-    # beginer ファイル存在チェック
+    # 入力ファイル存在チェック
     if (-not (Test-Path $InputFile)) {
         Write-Host "Error: $InputFile が見つかりません。" -ForegroundColor Red
         return
     }
 
-    # 前半（固定）
-    $before = @"
+    # 拡張子取得
+    $ext = [System.IO.Path]::GetExtension($InputFile).ToLower()
+
+    # txt の場合は .c を生成する
+    if ($ext -eq ".txt") {
+
+        # 出力ファイル名（.c に変換）
+        $OutputFile = [System.IO.Path]::ChangeExtension($InputFile, ".c")
+
+        # 前半（固定）
+        $before = @"
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <math.h>
 int main(void)
 {
 
 "@
 
-    # 後半（固定）
-    $after = @"
+        # 後半（固定）
+        $after = @"
+
     return 0;
 }
 "@
 
-    # beginer の中身を読み込み
-    $body = Get-Content $InputFile -Raw
+        # 本文読み込み
+        $body = Get-Content $InputFile -Raw
 
-    # 結合して beginer.c を生成
-    $before + $body + "`n" + $after | Set-Content $OutputFile -Encoding UTF8
+        # 結合して .c を生成
+        $before + $body + "`n" + $after | Set-Content $OutputFile -Encoding UTF8
 
-    
-    & run beginer.c
+        # run を呼び出す
+        run $OutputFile
+        return
+    }
+
+    # txt 以外はそのまま run に渡す
+    run $InputFile
 }
 
 function New-SourceFile {
