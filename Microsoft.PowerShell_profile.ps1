@@ -1,6 +1,11 @@
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
-function run($file) {
+function run {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$file
+    )
+
     # 拡張子を取得
     $ext = [System.IO.Path]::GetExtension($file)
 
@@ -33,16 +38,19 @@ function c {
     # 拡張子取得
     $ext = [System.IO.Path]::GetExtension($InputFile).ToLower()
 
-    # txt の場合は .c を生成する
+    # txt の場合は a.c を生成する
     if ($ext -eq ".txt") {
 
-        # 出力ファイル名（.c に変換）
-        $OutputFile = [System.IO.Path]::ChangeExtension($InputFile, ".c")
+        # 出力ファイル名は固定で a.c
+        $OutputFile = "a.c"
 
         # 前半（固定）
         $before = @"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <math.h>
 int main(void)
 
 "@
@@ -50,11 +58,14 @@ int main(void)
         # 本文読み込み
         $body = Get-Content $InputFile -Raw
 
-        # 結合して .c を生成
+        # 結合して a.c を生成
         $before + $body | Set-Content $OutputFile -Encoding UTF8
 
-        # run を呼び出す
-        run $OutputFile
+        # コンパイル & 実行
+        gcc a.c
+        if ($LASTEXITCODE -eq 0) {
+            ./a.exe
+        }
         return
     }
 
@@ -62,7 +73,7 @@ int main(void)
     run $InputFile
 }
 
-function New-SourceFile {
+function new {
     param(
         [Parameter(Mandatory=$true)]
         [string]$Name
@@ -115,5 +126,3 @@ int main()
     Set-Content -Path $Name -Value $template -Encoding UTF8
     Write-Host "Created $Name" -ForegroundColor Green
 }
-
-Set-Alias new New-SourceFile
